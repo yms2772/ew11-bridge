@@ -12,19 +12,31 @@ import (
 	"github.com/eclipse/paho.mqtt.golang"
 )
 
+type topic struct {
+	recv string
+	send string
+}
+
 type Communicator struct {
-	client    mqtt.Client
-	debug     bool
-	recvTopic string
-	sendTopic string
-	devices   []Device
+	client   mqtt.Client
+	debug    bool
+	devices  []Device
+	topicMap map[Bridge]topic
 }
 
 func NewCommunicator() (*Communicator, error) {
 	var c Communicator
-	c.recvTopic = os.Getenv("EW11_RECEIVE_TOPIC")
-	c.sendTopic = os.Getenv("EW11_SEND_TOPIC")
 	c.debug, _ = strconv.ParseBool(os.Getenv("EW11_DEBUG"))
+	c.topicMap = map[Bridge]topic{
+		Bridge1: {
+			recv: os.Getenv("EW11_RECEIVE_TOPIC"),
+			send: os.Getenv("EW11_SEND_TOPIC"),
+		},
+		Bridge2: {
+			recv: os.Getenv("EW11_2_RECEIVE_TOPIC"),
+			send: os.Getenv("EW11_2_SEND_TOPIC"),
+		},
+	}
 	c.client = mqtt.NewClient(mqtt.NewClientOptions().
 		AddBroker(os.Getenv("MQTT_BROKER_URL")).
 		SetClientID(os.Getenv("MQTT_BROKER_CLIENT_ID")).
@@ -66,7 +78,7 @@ func (c *Communicator) StartAndWait() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
-	c.client.Subscribe(c.recvTopic, 1, func(client mqtt.Client, message mqtt.Message) {
+	callback := func(client mqtt.Client, message mqtt.Message) {
 		payload := message.Payload()
 		for _, device := range c.devices {
 			if device.IsDevice(payload) {
@@ -75,7 +87,10 @@ func (c *Communicator) StartAndWait() {
 				}
 			}
 		}
-	})
+	}
+
+	c.client.Subscribe(c.topicMap[Bridge1].recv, 1, callback)
+	c.client.Subscribe(c.topicMap[Bridge2].recv, 1, callback)
 
 	<-ctx.Done()
 }

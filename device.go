@@ -29,8 +29,8 @@ func (d *DeviceBase) PublishToCustomTopic(topic string, payload any, retained bo
 	return d.c.client.Publish(topic, 1, retained, payload).Error()
 }
 
-func (d *DeviceBase) PublishToSendTopic(payload any, retained bool) error {
-	return d.PublishToCustomTopic(d.c.sendTopic, payload, retained)
+func (d *DeviceBase) PublishToSendTopic(bridge Bridge, payload any, retained bool) error {
+	return d.PublishToCustomTopic(d.c.topicMap[bridge].send, payload, retained)
 }
 
 func (d *DeviceBase) SubscribeFromCustomTopic(topic string, callback mqtt.MessageHandler) error {
