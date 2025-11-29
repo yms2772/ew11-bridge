@@ -37,6 +37,15 @@ func (d *DeviceBase) SubscribeFromCustomTopic(topic string, callback mqtt.Messag
 	return d.c.client.Subscribe(topic, 1, callback).Error()
 }
 
+func (d *DeviceBase) GenerateHomePackets() [4]byte {
+	var packets [4]byte
+	packets[0] = EncodeBCD(d.c.home.building / 100)
+	packets[1] = EncodeBCD(d.c.home.building % 100)
+	packets[2] = EncodeBCD(d.c.home.unit / 100)
+	packets[3] = EncodeBCD(d.c.home.unit % 100)
+	return packets
+}
+
 func (d *DeviceBase) setCommunicator(c *Communicator) {
 	d.c = c
 }

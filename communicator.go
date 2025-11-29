@@ -22,6 +22,10 @@ type Communicator struct {
 	debug    bool
 	devices  []Device
 	topicMap map[Bridge]topic
+	home     struct {
+		building int
+		unit     int
+	}
 }
 
 func NewCommunicator() (*Communicator, error) {
@@ -37,6 +41,20 @@ func NewCommunicator() (*Communicator, error) {
 			send: os.Getenv("EW11_2_SEND_TOPIC"),
 		},
 	}
+
+	building, err := strconv.Atoi(os.Getenv("EW11_HOME_BUILDING_NUMBER"))
+	if err != nil {
+		return nil, fmt.Errorf("동 번호가 잘못되었습니다: %v", err)
+	}
+
+	unit, err := strconv.Atoi(os.Getenv("EW11_HOME_UNIT_NUMBER"))
+	if err != nil {
+		return nil, fmt.Errorf("호 번호가 잘못되었습니다: %v", err)
+	}
+
+	c.home.building = building
+	c.home.unit = unit
+
 	c.client = mqtt.NewClient(mqtt.NewClientOptions().
 		AddBroker(os.Getenv("MQTT_BROKER_URL")).
 		SetClientID(os.Getenv("MQTT_BROKER_CLIENT_ID")).
