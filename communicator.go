@@ -56,10 +56,10 @@ func NewCommunicator() (*Communicator, error) {
 	c.home.unit = unit
 
 	c.client = mqtt.NewClient(mqtt.NewClientOptions().
-		AddBroker(os.Getenv("MQTT_BROKER_URL")).
-		SetClientID(os.Getenv("MQTT_BROKER_CLIENT_ID")).
-		SetUsername(os.Getenv("MQTT_BROKER_USERNAME")).
-		SetPassword(os.Getenv("MQTT_BROKER_PASSWORD")).
+		AddBroker(os.Getenv("EW11_MQTT_BROKER_URL")).
+		SetClientID(os.Getenv("EW11_MQTT_BROKER_CLIENT_ID")).
+		SetUsername(os.Getenv("EW11_MQTT_BROKER_USERNAME")).
+		SetPassword(os.Getenv("EW11_MQTT_BROKER_PASSWORD")).
 		SetCleanSession(true).
 		SetKeepAlive(30 * time.Second))
 	tok := c.client.Connect()
