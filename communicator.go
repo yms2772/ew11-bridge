@@ -61,6 +61,7 @@ func NewCommunicator() (*Communicator, error) {
 		SetUsername(os.Getenv("EW11_MQTT_BROKER_USERNAME")).
 		SetPassword(os.Getenv("EW11_MQTT_BROKER_PASSWORD")).
 		SetCleanSession(true).
+		SetOrderMatters(false).
 		SetKeepAlive(30 * time.Second))
 	tok := c.client.Connect()
 	if ok := tok.WaitTimeout(5 * time.Second); !ok {
