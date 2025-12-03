@@ -9,24 +9,26 @@ type Validatable[T comparable] interface {
 	func(T) error
 }
 
-func Validate[T Validatable[E], E comparable](f T, status *E, want E, delay, timeout time.Duration) error {
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
-	defer cancel()
+func Validate[T Validatable[E], E comparable](f T, status *E, want E, delay, timeout time.Duration) {
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), timeout)
+		defer cancel()
 
-	ticker := time.NewTicker(delay)
-	defer ticker.Stop()
+		ticker := time.NewTicker(delay)
+		defer ticker.Stop()
 
-	for {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		default:
-			if err := f(want); err != nil {
-				continue
-			}
-			if *status == want {
-				return nil
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				if err := f(want); err != nil {
+					continue
+				}
+				if *status == want {
+					return
+				}
 			}
 		}
-	}
+	}()
 }
