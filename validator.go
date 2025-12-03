@@ -13,6 +13,9 @@ func Validate[T Validatable[E], E comparable](f T, status *E, want E, delay, tim
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
+	ticker := time.NewTicker(delay)
+	defer ticker.Stop()
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -21,8 +24,6 @@ func Validate[T Validatable[E], E comparable](f T, status *E, want E, delay, tim
 			if err := f(want); err != nil {
 				continue
 			}
-
-			time.Sleep(delay)
 			if *status == want {
 				return nil
 			}
