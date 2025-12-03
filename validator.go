@@ -21,7 +21,7 @@ func Validate[T Validatable[E], E comparable](f T, status *E, want E, delay, tim
 			select {
 			case <-ctx.Done():
 				return
-			default:
+			case <-ticker.C:
 				if err := f(want); err != nil {
 					continue
 				}
