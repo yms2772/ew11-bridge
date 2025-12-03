@@ -5,11 +5,11 @@ import (
 	"time"
 )
 
-type Validatable interface {
-	func() error
+type Validatable[T comparable] interface {
+	func(T) error
 }
 
-func Validate[T Validatable, E comparable](f T, status *E, want E, delay, timeout time.Duration) error {
+func Validate[T Validatable[E], E comparable](f T, status *E, want E, delay, timeout time.Duration) error {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
@@ -21,7 +21,7 @@ func Validate[T Validatable, E comparable](f T, status *E, want E, delay, timeou
 		case <-ctx.Done():
 			return ctx.Err()
 		case <-ticker.C:
-			if err := f(); err != nil {
+			if err := f(want); err != nil {
 				continue
 			}
 			if *status == want {

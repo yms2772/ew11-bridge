@@ -5,8 +5,7 @@ import (
 )
 
 type Device interface {
-	On() error
-	Off() error
+	SetPower(bool) error
 	SetLevel(int) error
 	SetStatus([]byte) error
 	IsDevice([]byte) bool
