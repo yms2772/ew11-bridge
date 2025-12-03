@@ -1,24 +1,14 @@
 package ew11
 
-import (
-	"context"
-	"time"
-)
+import "time"
 
-type Validatable[T comparable] interface {
-	func(T) error
-}
-
-func Validate[T Validatable[E], E comparable](f T, status *E, want E, delay, timeout time.Duration) {
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
-	defer cancel()
-
+func Validate[T comparable](f func(T) error, status *T, want T, delay, timeout time.Duration) {
 	ticker := time.NewTicker(delay)
 	defer ticker.Stop()
 
 	for {
 		select {
-		case <-ctx.Done():
+		case <-time.After(timeout):
 			return
 		case <-ticker.C:
 			if err := f(want); err != nil {
